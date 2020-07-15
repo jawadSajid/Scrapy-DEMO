@@ -10,7 +10,9 @@ from itemadapter import ItemAdapter
 # Scraped data -> Item Containers -> Json/Csv files
 # Scraped data -> Item Containers -> Pipeline -> SQL/Mongo  DB
 
-import sqlite3
+# import sqlite3
+
+import mysql.connector
 
 
 class QuotesPipeline:
@@ -20,7 +22,13 @@ class QuotesPipeline:
         self.create_table()
 
     def create_connection(self):
-        self.conn = sqlite3.connect("quotes.db")
+        # self.conn = sqlite3.connect("quotes.db")
+
+        self.conn = mysql.connector.connect(
+            user='root',
+            host='localhost',
+            passwd='jawadSajid1',
+            database='quotes')
         self.curr = self.conn.cursor()
 
     def create_table(self):
@@ -32,10 +40,15 @@ class QuotesPipeline:
                  )""")
 
     def store_db(self, item):
+        # self.curr.execute("""insert into quotes_tb values(
+        #                     ?, ? , ?)""", (item['title'][0],
+        #                                    item['author'][0],
+        #                                    item['tag'][0]))
+
         self.curr.execute("""insert into quotes_tb values(
-                            ?, ? , ?)""", (item['title'][0],
-                                           item['author'][0],
-                                           item['tag'][0]))
+                            %s, %s , %s)""", (item['title'][0],
+                                              item['author'][0],
+                                              item['tag'][0]))
 
         self.conn.commit()
 
